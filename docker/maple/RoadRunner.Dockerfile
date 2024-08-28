@@ -152,9 +152,9 @@ COPY --link --chown=${USER}:${USER} /docker/maple/deployment/supervisord.conf /e
 COPY --link --chown=${USER}:${USER} /docker/maple/deployment/octane/RoadRunner/supervisord.roadrunner.conf /etc/supervisor/conf.d
 COPY --link --chown=${USER}:${USER} /docker/maple/deployment/supervisord.*.conf /etc/supervisor/conf.d/
 COPY --link --chown=${USER}:${USER} /docker/maple/deployment/php.ini ${PHP_INI_DIR}/conf.d/99-octane.ini
-# COPY --link --chown=${USER}:${USER} /docker/maple/deployment/octane/RoadRunner/.rr.yaml ./.rr.yaml
+COPY --link --chown=${USER}:${USER} /docker/maple/deployment/octane/RoadRunner/.rr.prod.yaml ./.rr.yaml
 COPY --link --chown=${USER}:${USER} /docker/maple/deployment/start-container /usr/local/bin/start-container
-COPY --link --chown=${USER}:${USER} /docker/maple/deployment/utilities.sh /utilities.sh
+COPY --link --chown=${USER}:${USER} /docker/maple/deployment/utilities.sh /deployment/utilities.sh
 
 RUN composer install \
     --classmap-authoritative \
@@ -170,7 +170,7 @@ RUN if composer show | grep spiral/roadrunner-cli >/dev/null; then \
 
 RUN chmod +x rr /usr/local/bin/start-container
 
-RUN cat /utilities.sh >> ~/.bashrc
+RUN cat /deployment/utilities.sh >> ~/.bashrc
 
 EXPOSE 8000
 EXPOSE 6001

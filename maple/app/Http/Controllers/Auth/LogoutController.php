@@ -16,6 +16,11 @@ class LogoutController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect()->intended($request->back_url ?? '/');
+        $tokenCookies = [
+            \Cookie::forget('access_token'),
+            \Cookie::forget('refresh_token'),
+        ];
+
+        return redirect()->intended($request->back_url ?? '/')->withCookies($tokenCookies);
     }
 }
