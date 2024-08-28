@@ -41,7 +41,7 @@ services:
             timeout: 5s
     minio:
         build: ./docker/minio
-        image: autumn/minio:lastest
+        image: "autumn/minio:${APP_VERSION}"
         ports:
             - "${FORWARD_MINIO_PORT:-9000}:9000"
             - "${FORWARD_MINIO_CONSOLE_PORT:-8900}:8900"
