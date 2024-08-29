@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class OAuthController extends Controller
 {
@@ -55,7 +56,7 @@ class OAuthController extends Controller
         ]);
 
         if ($response->failed()) {
-            return redirect('/');
+            return redirect('/error');
         }
 
         $credentials = $response->json();
@@ -64,5 +65,32 @@ class OAuthController extends Controller
             Cookie::make('access_token', data_get($credentials, 'access_token'), 60, null, null, null, false),
             Cookie::make('refresh_token', data_get($credentials, 'refresh_token'), 60, null, null, null, false),
         ]);
+    }
+
+    public function refresh(Request $request)
+    {
+        return $this->issueNewTokens($request->refresh_token, 'user');
+    }
+
+    public function adminRefresh(Request $request)
+    {
+        return $this->issueNewTokens($request->refresh_token, 'admin');
+    }
+
+    private function issueNewTokens($refreshToken, $clientType = 'user')
+    {
+        $response = Http::asForm()->post(env('APP_URL').'/oauth/token', [
+            'grant_type' => 'refresh_token',
+            'refresh_token' => $refreshToken,
+            'client_id' => config("oauth.$clientType.client_id"),
+            'client_secret' => config("oauth.$clientType.client_secret"),
+            'scope' => '*',
+        ]);
+
+        if ($response->failed()) {
+            throw new BadRequestHttpException('Bad request.');
+        }
+
+        return $response->json();
     }
 }

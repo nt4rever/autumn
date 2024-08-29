@@ -17,7 +17,7 @@ WORKDIR ${ROOT}
 
 RUN npm config set update-notifier false && npm set progress=false
 
-COPY --link ./maple/package*.json ./
+COPY --link ./package*.json ./
 
 RUN if [ -f $ROOT/package-lock.json ]; \
     then \
@@ -26,7 +26,7 @@ RUN if [ -f $ROOT/package-lock.json ]; \
     npm install --loglevel=error --no-audit; \
     fi
 
-COPY --link ./maple .
+COPY --link . .
 
 RUN npm run build
 
@@ -36,18 +36,15 @@ RUN npm run build
 
 FROM composer:${COMPOSER_VERSION} AS vendor
 
-FROM php:${PHP_VERSION}-cli-bookworm
+FROM php:${PHP_VERSION}-cli-alpine
 
 LABEL maintainer="nt4rever <levantanald@gmail.com>"
-LABEL org.opencontainers.image.title="Autumn Octane Dockerfile"
-LABEL org.opencontainers.image.licenses=MIT
 
 ARG WWWUSER=1000
 ARG WWWGROUP=1000
 ARG TZ=UTC
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    TERM=xterm-color \
+ENV TERM=xterm-color \
     WITH_HORIZON=false \
     WITH_SCHEDULER=false \
     OCTANE_SERVER=roadrunner \
@@ -58,17 +55,16 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 WORKDIR ${ROOT}
 
-SHELL ["/bin/bash", "-eou", "pipefail", "-c"]
+SHELL ["/bin/sh", "-eou", "pipefail", "-c"]
 
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime \
   && echo ${TZ} > /etc/timezone
 
 ADD --chmod=0755 https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
-RUN apt-get update; \
-    apt-get upgrade -yqq; \
-    apt-get install -yqq --no-install-recommends --show-progress \
-    apt-utils \
+RUN apk update; \
+    apk upgrade; \
+    apk add --no-cache \
     curl \
     wget \
     nano \
@@ -98,13 +94,10 @@ RUN apt-get update; \
     memcached \
     igbinary \
     ldap \
-    && apt-get -y autoremove \
-    && apt-get clean \
     && docker-php-source delete \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
-    && rm /var/log/lastlog /var/log/faillog
+    && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
-RUN arch="$(uname -m)" \
+RUN arch="$(apk --print-arch)" \
     && case "$arch" in \
     armhf) _cronic_fname='supercronic-linux-arm' ;; \
     aarch64) _cronic_fname='supercronic-linux-arm64' ;; \
@@ -118,19 +111,19 @@ RUN arch="$(uname -m)" \
     && mkdir -p /etc/supercronic \
     && echo "*/1 * * * * php ${ROOT}/artisan schedule:run --no-interaction" > /etc/supercronic/laravel
 
-RUN userdel --remove --force www-data \
-    && groupadd --force -g ${WWWGROUP} ${USER} \
-    && useradd -ms /bin/bash --no-log-init --no-user-group -g ${WWWGROUP} -u ${WWWUSER} ${USER}
+RUN addgroup -g ${WWWGROUP} ${USER} \
+    && adduser -D -h ${ROOT} -G ${USER} -u ${WWWUSER} -s /bin/sh ${USER}
 
-RUN chown -R ${USER}:${USER} ${ROOT} /var/{log,run} \
-    && chmod -R a+rw ${ROOT} /var/{log,run}
+RUN mkdir -p /var/log/supervisor /var/run/supervisor \
+    && chown -R ${USER}:${USER} ${ROOT} /var/log /var/run \
+    && chmod -R a+rw ${ROOT} /var/log /var/run
 
 RUN cp ${PHP_INI_DIR}/php.ini-production ${PHP_INI_DIR}/php.ini
 
 USER ${USER}
 
 COPY --link --chown=${USER}:${USER} --from=vendor /usr/bin/composer /usr/bin/composer
-COPY --link --chown=${USER}:${USER} ./maple/composer.json ./maple/composer.lock ./
+COPY --link --chown=${USER}:${USER} ./composer.json ./composer.lock ./
 
 RUN composer install \
     --no-dev \
@@ -140,21 +133,24 @@ RUN composer install \
     --no-scripts \
     --audit
 
-COPY --link --chown=${USER}:${USER} ./maple .
+COPY --link --chown=${USER}:${USER} . .
 COPY --link --chown=${USER}:${USER} --from=build ${ROOT}/public public
 
 RUN mkdir -p \
-    storage/framework/{sessions,views,cache,testing} \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/framework/cache \
+    storage/framework/testing \
     storage/logs \
     bootstrap/cache && chmod -R a+rw storage
 
-COPY --link --chown=${USER}:${USER} /docker/maple/deployment/supervisord.conf /etc/supervisor/
-COPY --link --chown=${USER}:${USER} /docker/maple/deployment/octane/RoadRunner/supervisord.roadrunner.conf /etc/supervisor/conf.d
-COPY --link --chown=${USER}:${USER} /docker/maple/deployment/supervisord.*.conf /etc/supervisor/conf.d/
-COPY --link --chown=${USER}:${USER} /docker/maple/deployment/php.ini ${PHP_INI_DIR}/conf.d/99-octane.ini
-COPY --link --chown=${USER}:${USER} /docker/maple/deployment/octane/RoadRunner/.rr.prod.yaml ./.rr.yaml
-COPY --link --chown=${USER}:${USER} /docker/maple/deployment/start-container /usr/local/bin/start-container
-COPY --link --chown=${USER}:${USER} /docker/maple/deployment/utilities.sh /deployment/utilities.sh
+COPY --link --chown=${USER}:${USER} ./docker/deployment/supervisord.conf /etc/supervisor/
+COPY --link --chown=${USER}:${USER} ./docker/deployment/octane/RoadRunner/supervisord.roadrunner.conf /etc/supervisor/conf.d/
+COPY --link --chown=${USER}:${USER} ./docker/deployment/supervisord.*.conf /etc/supervisor/conf.d/
+COPY --link --chown=${USER}:${USER} ./docker/deployment/php.ini ${PHP_INI_DIR}/conf.d/99-octane.ini
+COPY --link --chown=${USER}:${USER} ./docker/deployment/octane/RoadRunner/.rr.prod.yaml ./.rr.yaml
+COPY --link --chown=${USER}:${USER} ./docker/deployment/start-container /usr/local/bin/start-container
+COPY --link --chown=${USER}:${USER} ./docker/deployment/utilities.sh /deployment/utilities.sh
 
 RUN composer install \
     --classmap-authoritative \

@@ -210,4 +210,6 @@ return [
             ],
         ],
     ],
+
+    'authorize_emails' => array_filter(explode(',', env('HORIZON_AUTH_EMAIL', ''))),
 ];

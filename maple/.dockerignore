@@ -17,6 +17,8 @@ npm-debug.log
 yarn-error.log
 /vendor
 .env.backup
+.env
+.env.production
 /.idea/sonarlint
 .phpstorm.meta.php
 _ide_helper_models.php
