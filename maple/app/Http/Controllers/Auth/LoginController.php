@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ApiAdminLoginRequest;
+use App\Http\Requests\Auth\ApiLoginRequest;
 use App\Http\Requests\Auth\LoginRequest;
 
 class LoginController extends Controller
@@ -19,5 +21,19 @@ class LoginController extends Controller
         $request->session()->regenerate();
 
         return redirect()->intended('/');
+    }
+
+    public function apiLogin(ApiLoginRequest $request)
+    {
+        $response = $request->oauthAuthenticate();
+
+        return $response;
+    }
+
+    public function apiAdminLogin(ApiAdminLoginRequest $request)
+    {
+        $response = $request->oauthAuthenticate();
+
+        return $response;
     }
 }

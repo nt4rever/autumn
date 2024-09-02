@@ -19,3 +19,7 @@ Route::prefix('/oauth')->group(function () {
     Route::get('/login', [OAuthController::class, 'redirect']);
     Route::get('/callback', [OAuthController::class, 'callback']);
 });
+
+Route::get('/error', function () {
+    return view('errors.400');
+});

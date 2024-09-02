@@ -30,5 +30,7 @@ class AppServiceProvider extends ServiceProvider
             now()->addDays(config('oauth.personal_access_tokens_expire_in'))
         );
 
+        Passport::enablePasswordGrant();
+
     }
 }

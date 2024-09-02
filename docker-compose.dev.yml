@@ -11,7 +11,7 @@ services:
             POSTGRES_PASSWORD: "${DB_PASSWORD:-secret}"
         volumes:
             - "postgres:/var/lib/postgresql/data"
-            - "./docker/postgres/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql"
+            - "./postgres/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql"
         networks:
             - maple-network
         healthcheck:
@@ -40,7 +40,7 @@ services:
             retries: 3
             timeout: 5s
     minio:
-        build: ./docker/minio
+        build: ./minio
         image: "autumn/minio:${APP_VERSION}"
         ports:
             - "${FORWARD_MINIO_PORT:-9000}:9000"
@@ -49,8 +49,8 @@ services:
             MINIO_ROOT_USER: "${MINIO_ROOT_USER}"
             MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
         volumes:
-            - "minio:/data/minio"
-            - "./docker/minio/export:/export"
+            - "minio:/data"
+            - "./minio/export:/export"
         networks:
             - maple-network
         healthcheck:

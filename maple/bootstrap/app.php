@@ -24,5 +24,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
     })
     ->withExceptions(function (Exceptions $exceptions) {
+        $exceptions->dontReport([
+            \League\OAuth2\Server\Exception\OAuthServerException::class,
+            \Laravel\Passport\Exceptions\OAuthServerException::class,
+        ]);
+
         //
     })->create();
