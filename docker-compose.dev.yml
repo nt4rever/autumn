@@ -13,7 +13,7 @@ services:
             - "postgres:/var/lib/postgresql/data"
             - "./postgres/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql"
         networks:
-            - maple-network
+            - autumn-network
         healthcheck:
             test:
                 [
@@ -34,7 +34,7 @@ services:
         volumes:
             - "redis:/data"
         networks:
-            - maple-network
+            - autumn-network
         healthcheck:
             test: ["CMD", "redis-cli", "ping"]
             retries: 3
@@ -52,16 +52,16 @@ services:
             - "minio:/data"
             - "./minio/export:/export"
         networks:
-            - maple-network
+            - autumn-network
         healthcheck:
             test: ["CMD", "mc", "ready", "local"]
             retries: 3
             timeout: 5s
 
 networks:
-    maple-network:
+    autumn-network:
         driver: bridge
-        name: maple-network
+        name: autumn-network
 volumes:
     postgres:
     redis:

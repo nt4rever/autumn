@@ -23,3 +23,7 @@ Route::prefix('/oauth')->group(function () {
 Route::get('/error', function () {
     return view('errors.400');
 });
+
+Route::get('/health', function () {
+    return 'OK';
+});
