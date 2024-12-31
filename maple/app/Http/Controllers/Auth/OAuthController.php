@@ -47,13 +47,15 @@ class OAuthController extends Controller
             return redirect('/error');
         }
 
-        $response = Http::asForm()->post(env('APP_URL').'/oauth/token', [
-            'grant_type' => 'authorization_code',
-            'client_id' => config('oauth.client_id'),
-            'redirect_uri' => config('oauth.client_callback'),
-            'code_verifier' => $codeVerifier,
-            'code' => $request->code,
-        ]);
+        $response = Http::asForm()
+            ->timeout(config('constant.http.timeout'))
+            ->post(env('APP_URL').'/oauth/token', [
+                'grant_type' => 'authorization_code',
+                'client_id' => config('oauth.client_id'),
+                'redirect_uri' => config('oauth.client_callback'),
+                'code_verifier' => $codeVerifier,
+                'code' => $request->code,
+            ]);
 
         if ($response->failed()) {
             return redirect('/error');
@@ -79,13 +81,15 @@ class OAuthController extends Controller
 
     private function issueNewTokens($refreshToken, $clientType = 'user')
     {
-        $response = Http::asForm()->post(env('APP_URL').'/oauth/token', [
-            'grant_type' => 'refresh_token',
-            'refresh_token' => $refreshToken,
-            'client_id' => config("oauth.$clientType.client_id"),
-            'client_secret' => config("oauth.$clientType.client_secret"),
-            'scope' => '*',
-        ]);
+        $response = Http::asForm()
+            ->timeout(config('constant.http.timeout'))
+            ->post(env('APP_URL').'/oauth/token', [
+                'grant_type' => 'refresh_token',
+                'refresh_token' => $refreshToken,
+                'client_id' => config("oauth.$clientType.client_id"),
+                'client_secret' => config("oauth.$clientType.client_secret"),
+                'scope' => '*',
+            ]);
 
         if ($response->failed()) {
             throw new BadRequestHttpException('Bad request.');

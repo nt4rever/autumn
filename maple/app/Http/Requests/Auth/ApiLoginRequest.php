@@ -37,14 +37,16 @@ class ApiLoginRequest extends LoginRequest
 
     public function issueTokens(string $username, string $password, $scope = '*'): Response
     {
-        $response = Http::asForm()->post(env('APP_URL').'/oauth/token', [
-            'grant_type' => 'password',
-            'client_id' => config("oauth.$this->clientType.client_id"),
-            'client_secret' => config("oauth.$this->clientType.client_secret"),
-            'username' => $username,
-            'password' => $password,
-            'scope' => $scope,
-        ]);
+        $response = Http::asForm()
+            ->timeout(config('constant.http.timeout'))
+            ->post(env('APP_URL').'/oauth/token', [
+                'grant_type' => 'password',
+                'client_id' => config("oauth.$this->clientType.client_id"),
+                'client_secret' => config("oauth.$this->clientType.client_secret"),
+                'username' => $username,
+                'password' => $password,
+                'scope' => $scope,
+            ]);
 
         return $response;
     }

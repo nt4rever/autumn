@@ -20,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \DB::connection()->setQueryGrammar(new \App\Database\Query\Grammars\PostgresGrammar);
+
         Passport::tokensExpireIn(
             now()->addDays(config('oauth.access_token_expire_in'))
         );

@@ -21,6 +21,8 @@ class AccountSeeder extends Seeder
                 'name' => 'Admin',
                 'email' => 'admin@autumn.io',
                 'password' => Hash::make('abcd1234'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]
         );
 
@@ -31,14 +33,16 @@ class AccountSeeder extends Seeder
                 'name' => 'User',
                 'email' => 'user@autumn.io',
                 'password' => Hash::make('abcd1234'),
+                'created_at' => now(),
+                'updated_at' => now(),
             ]
         );
 
         DB::table('oauth_clients')->insert([
-            'id' => Str::orderedUuid(),
+            'id' => config('oauth.client_id'),
             'user_id' => $adminId,
             'name' => 'Public',
-            'redirect' => env('OAUTH_CLIENT_CALLBACK', 'http://localhost:8000/oauth/callback'),
+            'redirect' => config('oauth.client_callback'),
             'personal_access_client' => false,
             'password_client' => false,
             'revoked' => false,
@@ -47,10 +51,10 @@ class AccountSeeder extends Seeder
         ]);
 
         DB::table('oauth_clients')->insert([
-            'id' => Str::orderedUuid(),
+            'id' => config('oauth.user.client_id'),
             'user_id' => $adminId,
             'name' => 'Api [users]',
-            'secret' => Str::random(40),
+            'secret' => config('oauth.user.client_secret'),
             'provider' => 'users',
             'redirect' => 'http://localhost',
             'personal_access_client' => false,
@@ -61,10 +65,10 @@ class AccountSeeder extends Seeder
         ]);
 
         DB::table('oauth_clients')->insert([
-            'id' => Str::orderedUuid(),
+            'id' => config('oauth.admin.client_id'),
             'user_id' => $adminId,
             'name' => 'Api [admins]',
-            'secret' => Str::random(40),
+            'secret' => config('oauth.admin.client_secret'),
             'provider' => 'admins',
             'redirect' => 'http://localhost',
             'personal_access_client' => false,
