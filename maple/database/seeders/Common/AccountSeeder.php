@@ -41,7 +41,7 @@ class AccountSeeder extends Seeder
         DB::table('oauth_clients')->insert([
             'id' => config('oauth.client_id'),
             'user_id' => $adminId,
-            'name' => 'Public',
+            'name' => 'Autumn OAuth',
             'redirect' => config('oauth.client_callback'),
             'personal_access_client' => false,
             'password_client' => false,

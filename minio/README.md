@@ -1,3 +1,9 @@
+## Restore data command
+
+```bash
+docker compose exec minio /scripts/restore.sh
+```
+
 ## Backup data command
 
 ```bash

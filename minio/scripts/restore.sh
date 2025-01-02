@@ -9,5 +9,3 @@ if [ -d "/export" ] && [ "$(ls -A /export)" ]; then
 
     echo "Restore backup data successfully!";
 fi
-
-minio server /data/minio --console-address ":8900";
