@@ -1,38 +1,64 @@
 services:
-    # nginx:
-    #     image: nginx:1.27.2
-    #     volumes:
-    #         - ./nginx/host.octane.conf:/etc/nginx/conf.d/default.conf
-    #     ports:
-    #         - 80:80
-    #     networks:
-    #         - autumn-webserver
-    #     depends_on:
-    #         maple:
-    #             condition: service_healthy
+    nginx:
+        image: nginx:1.27.2
+        volumes:
+            - ./nginx/host.octane.conf:/etc/nginx/conf.d/default.conf
+        ports:
+            - 80:80
+        networks:
+            - autumn-webserver
+        depends_on:
+            maple:
+                condition: service_healthy
 
-    # maple:
-    #     build:
-    #         context: ./maple
-    #         dockerfile: ./docker/RoadRunner.Dockerfile
-    #     image: autumn/maple:0.0.1
-    #     env_file: ./maple/.env
-    #     networks:
-    #         - autumn-webserver
-    #         - autumn-service
-    #     healthcheck:
-    #         test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-    #         interval: 15s
-    #         timeout: 5s
-    #         retries: 3
-    #         start_period: 10s
-    #     depends_on:
-    #         postgres:
-    #             condition: service_healthy
-    #         redis:
-    #             condition: service_healthy
-    #         minio:
-    #             condition: service_started
+    maple:
+        build:
+            context: ./maple
+            dockerfile: ./docker/RoadRunner.Dockerfile
+        image: autumn/maple:0.0.1
+        env_file: ./maple/.env.production
+        networks:
+            - autumn-webserver
+            - autumn-service
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+            interval: 15s
+            timeout: 5s
+            retries: 3
+            start_period: 10s
+        depends_on:
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            minio:
+                condition: service_started
+
+    maple-worker:
+        build:
+            context: ./maple
+            dockerfile: ./docker/RoadRunner.Dockerfile
+        image: autumn/maple:0.0.1
+        env_file: ./maple/.env.production
+        environment:
+            CONTAINER_MODE: worker
+            WORKER_COMMAND: php /var/www/html/artisan queue:work
+        networks:
+            - autumn-webserver
+            - autumn-service
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+            interval: 15s
+            timeout: 5s
+            retries: 3
+            start_period: 10s
+        depends_on:
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+            minio:
+                condition: service_started
 
     postgres:
         image: postgres:15
