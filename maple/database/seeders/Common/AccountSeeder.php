@@ -15,7 +15,7 @@ class AccountSeeder extends Seeder
     public function run(): void
     {
         $adminId = Str::orderedUuid();
-        DB::table('admins')->insert(
+        DB::table('admins')->insertOrIgnore(
             [
                 'id' => $adminId,
                 'name' => 'Admin',
@@ -27,7 +27,7 @@ class AccountSeeder extends Seeder
         );
 
         $userId = \Str::orderedUuid();
-        DB::table('users')->insert(
+        DB::table('users')->insertOrIgnore(
             [
                 'id' => $userId,
                 'name' => 'User',
@@ -38,7 +38,7 @@ class AccountSeeder extends Seeder
             ]
         );
 
-        DB::table('oauth_clients')->insert([
+        DB::table('oauth_clients')->insertOrIgnore([
             'id' => config('oauth.client_id'),
             'user_id' => $adminId,
             'name' => 'Autumn OAuth',
@@ -50,7 +50,7 @@ class AccountSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        DB::table('oauth_clients')->insert([
+        DB::table('oauth_clients')->insertOrIgnore([
             'id' => config('oauth.user.client_id'),
             'user_id' => $adminId,
             'name' => 'Api [users]',
@@ -64,7 +64,7 @@ class AccountSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        DB::table('oauth_clients')->insert([
+        DB::table('oauth_clients')->insertOrIgnore([
             'id' => config('oauth.admin.client_id'),
             'user_id' => $adminId,
             'name' => 'Api [admins]',

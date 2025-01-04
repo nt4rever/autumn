@@ -1,5 +1,2 @@
-/vendor/
-node_modules/
+logs/
 .env
-.env.production
-.env.backup

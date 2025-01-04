@@ -130,7 +130,8 @@ RUN composer install \
     --no-interaction \
     --no-autoloader \
     --no-ansi \
-    --no-scripts
+    --no-scripts \
+    --audit
 
 COPY --chown=${USER}:${USER} . .
 COPY --chown=${USER}:${USER} --from=build ${ROOT}/public public
@@ -143,11 +144,10 @@ RUN mkdir -p \
     storage/logs \
     bootstrap/cache && chmod -R a+rw storage
 
+COPY --chown=${USER}:${USER} ./docker/deployment/.rr.prod.yaml ./.rr.yaml
 COPY --chown=${USER}:${USER} ./docker/deployment/supervisord.conf /etc/supervisor/
-COPY --chown=${USER}:${USER} ./docker/deployment/octane/RoadRunner/supervisord.roadrunner.conf /etc/supervisor/conf.d/
 COPY --chown=${USER}:${USER} ./docker/deployment/supervisord.*.conf /etc/supervisor/conf.d/
 COPY --chown=${USER}:${USER} ./docker/deployment/php.ini ${PHP_INI_DIR}/conf.d/99-octane.ini
-COPY --chown=${USER}:${USER} ./docker/deployment/octane/RoadRunner/.rr.prod.yaml ./.rr.yaml
 COPY --chown=${USER}:${USER} ./docker/deployment/start-container /usr/local/bin/start-container
 COPY --chown=${USER}:${USER} ./docker/deployment/utilities.sh /deployment/utilities.sh
 
